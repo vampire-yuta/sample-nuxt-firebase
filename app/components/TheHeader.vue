@@ -7,11 +7,17 @@
       Post List
     </el-menu-item>
 
-    <no-ssr>
-      <el-menu-item index="4" style="float: right" :route="{ path: '/' }">
-        <span>Login</span>
-      </el-menu-item>
-    </no-ssr>
+    <el-menu-item
+      index="4"
+      style="float: right"
+      :route="{ path: `/users/${user.id}` }"
+      v-if="user"
+    >
+      <span>{{ user.id }}</span>
+    </el-menu-item>
+    <el-menu-item index="4" style="float: right" :route="{ path: '/' }" v-else>
+      <span>Login</span>
+    </el-menu-item>
     <el-menu-item
       index="5"
       style="float: right"
@@ -21,3 +27,13 @@
     </el-menu-item>
   </el-menu>
 </template>
+
+<script>
+import { mapGetters } from "vuex";
+
+export default {
+  computed: {
+    ...mapGetters(["user"]),
+  },
+};
+</script>

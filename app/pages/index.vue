@@ -13,7 +13,9 @@
           <el-checkbox v-model="isCreateMode">Create Account</el-checkbox>
         </div>
         <div class="text-right">
-          <el-button type="primary">{{ buttonText }}</el-button>
+          <el-button type="primary" @click="handleClickSubmit">{{
+            buttonText
+          }}</el-button>
         </div>
       </form>
     </el-card>
@@ -21,8 +23,14 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
+import Cookies from "universal-cookie";
+
 export default {
-  asyncData() {
+  asyncData({ redirect, store }) {
+    if (store.getters["user"]) {
+      redirect("/posts/");
+    }
     return {
       isCreateMode: false,
       formData: {
@@ -34,6 +42,57 @@ export default {
     buttonText() {
       return this.isCreateMode ? "NewCreate" : "Login";
     },
+    ...mapGetters(["user"]),
+  },
+  methods: {
+    async handleClickSubmit() {
+      const cookies = new Cookies();
+      if (this.isCreateMode) {
+        try {
+          await this.register({ ...this.formData });
+          this.$notify({
+            type: "success",
+            title: "Crete Account Success",
+            message: `Registerd ${this.formData.id}`,
+            position: "buttom-right",
+            duration: 1000,
+          });
+          cookies.set("user", JSON.stringify(this.user));
+          this.$router.push("/posts/");
+        } catch (error) {
+          console.log(error);
+          this.$notify.error({
+            title: "Create Account Failed",
+            message: "Already registerd or Injustice UserID.",
+            position: "buttom-right",
+            duration: 1000,
+          });
+        }
+      } else {
+        try {
+          await this.login({ ...this.formData });
+          console.log("new cookie");
+          this.$notify({
+            type: "success",
+            title: "Login Success",
+            message: `logined ${this.formData.id}`,
+            position: "buttom-right",
+            duration: 1000,
+          });
+          cookies.set("user", JSON.stringify(this.user));
+          this.$router.push("/posts/");
+        } catch (error) {
+          console.log(error);
+          this.$notify.error({
+            title: "Login Failed",
+            message: "Injustice UserID.",
+            position: "buttom-right",
+            duration: 1000,
+          });
+        }
+      }
+    },
+    ...mapActions(["login", "register"]),
   },
 };
 </script>
