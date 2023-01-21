@@ -4,7 +4,12 @@
       <div slot="header" class="clearfix">
         <span>New Posts</span>
       </div>
-      <el-table :data="showPosts" style="width: 100%" class="table">
+      <el-table
+        :data="showPosts"
+        style="width: 100%"
+        @row-click="handleClick"
+        class="table"
+      >
         <el-table-column prop="title" label="Title"> </el-table-column>
         <el-table-column prop="user.id" label="Poster" width="180">
         </el-table-column>
@@ -16,29 +21,25 @@
 </template>
 
 <script>
+import moment from "~/plugins/moment";
+import { mapGetters } from "vuex";
+
 export default {
+  async asyncData({ store }) {
+    await store.dispatch("posts/fetchPosts");
+  },
   computed: {
     showPosts() {
-      return [
-        {
-          id: "001",
-          title: "How to development Nuxt.js Application",
-          body: "Lorem ipsum dolor sit amet, consectetru adipiss....",
-          create_at: "2018/11/11 12:00:00",
-          user: {
-            id: "yuta",
-          },
-        },
-        {
-          id: "002",
-          title: "Deployment Nuxt.js Application to Heroku",
-          body: "Lorem ipsum dolor sit amet, consectetru adipiss....",
-          create_at: "2022/11/11 12:00:00",
-          user: {
-            id: "yuta",
-          },
-        },
-      ];
+      return this.posts.map((post) => {
+        post.created_at = moment(post.created_at).format("YYYY/MM/DD HH:mm:ss");
+        return post;
+      });
+    },
+    ...mapGetters("posts", ["posts"]),
+  },
+  methods: {
+    handleClick(post) {
+      this.$router.push(`/posts/${post.id}`);
     },
   },
 };
