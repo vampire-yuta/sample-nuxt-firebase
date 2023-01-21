@@ -6,6 +6,8 @@ export const state = () => ({
 
 export const getters = {
   posts: (state) => state.posts,
+  user: (state) =>
+    state.user ? Object.assign({ likes: [] }, state.user) : null,
 };
 
 export const mutations = {
@@ -52,5 +54,14 @@ export const actions = {
       putData,
     ]);
     commit("addPost", { post });
+  },
+  async addLikeLogToPost({ commit }, { user, post }) {
+    user.likes.push({
+      created_at: moment().format(),
+      user_id: user.id,
+      post_id: post.id,
+    });
+    const newPost = await this.$axios.$put(`/posts/${post.id}.json`, post);
+    commit("updatePost", { post: newPost });
   },
 };
